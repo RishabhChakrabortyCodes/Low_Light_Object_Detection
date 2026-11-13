@@ -1,0 +1,22 @@
+[project]
+name = "low-light"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "TheArcaneVamp", email = "rishabhchakrabortyofficial@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "gdown>=6.5.1",
+    "numpy>=2.5.4",
+    "pandas>=3.1.1",
+    "ultralytics>=8.4.211",
+]
+
+[project.scripts]
+low-light = "low_light:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
