@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
-import torch 
 from sklearn.model_selection import train_test_split
+import os
 
 EXDARK_PATH = "data/raw/images/ExDark"
 EXDARK_DIR = Path(EXDARK_PATH)
@@ -18,8 +18,16 @@ for directory in EXDARK_DIR.iterdir():
     print(f"Number of images in class {class_name}: {count}")
         
 df = pd.DataFrame(data)
+OUTPUT_PATH = f"data/outputs"
 
-df.to_csv(f"{EXDARK_PATH}/classes.csv", index=False)
+if not Path(OUTPUT_PATH).exists():
+    os.mkdir(OUTPUT_PATH)
+
+CLASSES_CSV_PATH = f"{OUTPUT_PATH}/classes.csv"
+if Path(CLASSES_CSV_PATH).exists():
+    print("The classes.csv file already exists...")
+else:
+    df.to_csv(CLASSES_CSV_PATH, index=False)
 
 # Train/Test/Val Split
 
@@ -38,10 +46,16 @@ val_df, test_df = train_test_split(
     random_state=42,
     stratify=temp_df["class"]
 )
+SPLIT_CSV_PATH = f"{OUTPUT_PATH}/splits"
+if Path(SPLIT_CSV_PATH).exists():
+    print("The split files already exists...")
+else:
+    os.mkdir(SPLIT_CSV_PATH)
+    train_df.to_csv(f"{SPLIT_CSV_PATH}/train.csv", index=False)
+    val_df.to_csv(f"{SPLIT_CSV_PATH}/validation.csv", index = False)
+    test_df.to_csv(f"{SPLIT_CSV_PATH}/test.csv", index=False)
 
-train_df.to_csv(f"{EXDARK_PATH}/train.csv", index=False)
-val_df.to_csv(f"{EXDARK_PATH}/validation.csv", index = False)
-test_df.to_csv(f"{EXDARK_PATH}/test.csv", index=False)
+
 
 print(df.__len__)       
 
