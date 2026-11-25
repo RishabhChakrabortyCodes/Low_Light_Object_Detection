@@ -1,5 +1,5 @@
 # configs/baseline.yaml
-run_name: baseline_v8n_exdark
+run_name: finetune_v8n_exdark
 seed: 0
 
 model:
