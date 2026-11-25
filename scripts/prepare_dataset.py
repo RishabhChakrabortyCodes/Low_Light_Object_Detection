@@ -9,7 +9,7 @@ EXDARK_DIR = Path(EXDARK_PATH)
 data = []
 
 for directory in EXDARK_DIR.iterdir():
-    class_name = str(directory).split('/')[4]
+    class_name = directory.name
     count = 0
     for _file in directory.iterdir():
         count += 1

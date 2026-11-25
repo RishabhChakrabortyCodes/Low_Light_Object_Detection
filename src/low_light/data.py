@@ -1,6 +1,9 @@
 """ExDark -> YOLO-format dataset conversion shared by the baseline scripts."""
 from pathlib import Path
 
+import os
+import shutil
+
 import pandas as pd
 from PIL import Image
 from ultralytics.utils import YAML
@@ -36,6 +39,19 @@ def _annotation_file(cls: str, image_name: str) -> Path:
     raise FileNotFoundError(f"No annotation for {cls}/{image_name}")
 
 
+def _link_or_copy(src: Path, dst: Path) -> None:
+    """Symlink if possible; fall back to hardlink then copy (Windows without symlink rights)."""
+    try:
+        dst.symlink_to(src)
+        return
+    except (OSError, NotImplementedError):
+        pass
+    try:
+        os.link(src, dst)
+    except OSError:
+        shutil.copy2(src, dst)
+
+
 def build_split(split: str, out_root: Path, class_ids: dict, force: bool = False) -> int:
     """Symlink the images of one split and write YOLO labels. Returns box count.
 
@@ -52,7 +68,7 @@ def build_split(split: str, out_root: Path, class_ids: dict, force: bool = False
         name = f"{cls}_{src.name}"
         link = img_out / name
         if not link.exists():
-            link.symlink_to(src)
+            _link_or_copy(src, link)
 
         label_file = lbl_out / f"{Path(name).stem}.txt"
         if label_file.exists() and not force:
