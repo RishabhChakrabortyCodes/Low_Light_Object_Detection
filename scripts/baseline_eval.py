@@ -13,67 +13,11 @@ import json
 from pathlib import Path
 
 import pandas as pd
-from PIL import Image
 from ultralytics import YOLO
-from ultralytics.utils import YAML
+
+from low_light.data import build_coco_split
 
 ROOT = Path(__file__).resolve().parent.parent
-ANNO_DIR = ROOT / "data/raw/annotations/ExDark_Annno"
-SPLIT_DIR = ROOT / "data/outputs/splits"
-YOLO_DIR = ROOT / "data/yolo_coco"
-
-# ExDark class -> COCO class id
-EXDARK_TO_COCO = {
-    "Bicycle": 1, "Boat": 8, "Bottle": 39, "Bus": 5, "Car": 2, "Cat": 15,
-    "Chair": 56, "Cup": 41, "Dog": 16, "Motorbike": 3, "People": 0, "Table": 60,
-}
-
-
-def build_split(split: str, coco_names: dict) -> Path:
-    """Symlink images and write YOLO labels for one split; return the data yaml."""
-    out = YOLO_DIR / split
-    img_out, lbl_out = out / "images", out / "labels"
-    img_out.mkdir(parents=True, exist_ok=True)
-    lbl_out.mkdir(parents=True, exist_ok=True)
-
-    df = pd.read_csv(SPLIT_DIR / f"{split}.csv")
-    n_boxes = 0
-    for image, cls in zip(df["image"], df["class"]):
-        src = (ROOT / image).resolve()
-        name = f"{cls}_{src.name}"
-        link = img_out / name
-        if not link.exists():
-            link.symlink_to(src)
-
-        with Image.open(src) as im:
-            w, h = im.size
-        lines = []
-        ann = ANNO_DIR / cls / f"{src.name}.txt"
-        for row in ann.read_text().splitlines():
-            if row.startswith("%") or not row.strip():
-                continue
-            parts = row.split()
-            if parts[0] not in EXDARK_TO_COCO:
-                continue
-            x, y, bw, bh = map(float, parts[1:5])
-            x1, y1 = max(x, 0), max(y, 0)
-            x2, y2 = min(x + bw, w), min(y + bh, h)
-            if x2 <= x1 or y2 <= y1:
-                continue
-            lines.append(
-                f"{EXDARK_TO_COCO[parts[0]]} {(x1 + x2) / 2 / w:.6f} {(y1 + y2) / 2 / h:.6f} "
-                f"{(x2 - x1) / w:.6f} {(y2 - y1) / h:.6f}"
-            )
-        n_boxes += len(lines)
-        (lbl_out / f"{Path(name).stem}.txt").write_text("\n".join(lines))
-    print(f"[{split}] {len(df)} images, {n_boxes} boxes")
-
-    data_yaml = YOLO_DIR / f"{split}.yaml"
-    YAML.save(data_yaml, {
-        "path": str(YOLO_DIR), "train": f"{split}/images", "val": f"{split}/images",
-        "names": coco_names,
-    })
-    return data_yaml
 
 
 def main():
@@ -86,7 +30,7 @@ def main():
     args = ap.parse_args()
 
     model = YOLO(args.weights)
-    data_yaml = build_split(args.split, model.names)
+    data_yaml = build_coco_split(args.split, model.names)
 
     out_dir = ROOT / "outputs/baseline_v8n_exdark"
     m = model.val(
