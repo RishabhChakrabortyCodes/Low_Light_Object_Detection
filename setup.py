@@ -11,7 +11,7 @@ YOLO-format dataset -> yolov8n.pt -> sanity check.
 
 Afterwards:
     uv run python scripts/baseline_eval.py          # zero-shot YOLOv8n, test split
-    uv run python scripts/train.py --device 0       # fine-tune + evaluate
+    uv run python scripts/baseline_train.py --device 0       # fine-tune + evaluate
 """
 import shutil
 import subprocess
@@ -86,7 +86,7 @@ def main() -> None:
 
     print("\nSetup complete. Run:\n"
           "  uv run python scripts/baseline_eval.py       # zero-shot baseline (test split)\n"
-          "  uv run python scripts/train.py --device 0    # fine-tune + evaluate (--device cpu without a GPU)")
+          "  uv run python scripts/baseline_train.py --device 0    # fine-tune + evaluate (--device cpu without a GPU)")
 
 
 if __name__ == "__main__":

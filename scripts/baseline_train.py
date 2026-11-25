@@ -6,10 +6,10 @@ Everything is driven by a config (default: configs/baseline.yaml). Pipeline:
   3. evaluate best.pt on eval.split and write metrics JSON + plots
 
 Usage (from the project root):
-    python scripts/train.py                       # full run from the config
-    python scripts/train.py --device 0            # pick a GPU
-    python scripts/train.py --epochs 1 --fraction 0.05 --name smoke   # smoke test
-    python scripts/train.py --eval-only runs.pt   # skip training, evaluate weights
+    python scripts/baseline_train.py                       # full run from the config
+    python scripts/baseline_train.py --device 0            # pick a GPU
+    python scripts/baseline_train.py --epochs 1 --fraction 0.05 --name smoke   # smoke test
+    python scripts/baseline_train.py --eval-only runs.pt   # skip training, evaluate weights
 """
 import argparse
 import json
